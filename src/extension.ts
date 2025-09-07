@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as fsUtils from './fsUtils';
+import * as extUtils from './extUtils';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -18,22 +18,21 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		var currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.uri.fsPath;
-		var currentlyOpenTabfilename = vscode.window.activeTextEditor?.document.fileName.split('\\').pop();
+		const repoInfo = extUtils.findGitConfig(currentlyOpenTabfilePath || '');
 
-		const gitConfigPath = fsUtils.findGitConfig(currentlyOpenTabfilePath || '');
-		const gitConfigContents = gitConfigPath ? fsUtils.readGitConfig(gitConfigPath) : '';
+		if(repoInfo !== null) {
 
-		if(gitConfigContents !== '') {
-			//https://github.com/xcuriouscoder/vscext.git
-			const remoteUrl = gitConfigPath ? fsUtils.readGitConfigValue(gitConfigContents, 'url') : null;
-			const trimmedRemoteUrl = remoteUrl ? remoteUrl.replace(/\.git$/, '') : null;
-			const remoteBranch = gitConfigPath ? fsUtils.readGitConfigValue(gitConfigContents, 'merge') : null;
-			const branchName = remoteBranch ? remoteBranch.split('/').pop() : 'main';
+			const onlineRepoUrl = extUtils.getUrlForOpenFile(currentlyOpenTabfilePath || '', repoInfo);
 
-			// https://github.com/xcuriouscoder/vscext/blob/main/README.md
-			const onlineRepoUrl = trimmedRemoteUrl + '/blob/' + branchName + '/' + currentlyOpenTabfilename;
-			vscode.window.showInformationMessage('GitConfigUrl: ' + onlineRepoUrl);
-			vscode.env.openExternal(vscode.Uri.parse(onlineRepoUrl));
+			if(onlineRepoUrl === null)
+			{
+				vscode.window.showInformationMessage('Only GitHub repos are supported currently.');
+				return;
+			}
+			else
+			{
+				vscode.env.openExternal(vscode.Uri.parse(onlineRepoUrl));
+			}
 		}
 		else {
 			vscode.window.showInformationMessage('No .git/config found in the current file path or its parent directories.');
