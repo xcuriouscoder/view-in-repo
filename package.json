@@ -4,7 +4,7 @@
   "description": "Open the current file in the online repo.",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.103.0"
   },
   "categories": [
     "Other"
@@ -45,5 +45,9 @@
     "typescript": "^5.9.2",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2"
+  },
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/xcuriouscoder/view-in-repo"
   }
 }
